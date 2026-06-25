@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D0D1A">
+    <meta name="background-color" content="#0D0D1A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>WatchVault — Your List</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="logo"><span>Watch</span><span>Vault</span></div>
+        <div class="logo-sub">Your Personal Watchlist</div>
+        <div class="header-actions">
+            <button id="btn-install" class="btn-icon hidden" title="Install App">📱 Install</button>
+            <button id="btn-export" class="btn-icon" title="Export Data">⬇️ Export</button>
+            <label class="btn-icon" title="Import Data">
+                ⬆️ Import <input type="file" id="inp-import" accept=".json" hidden>
+            </label>
+        </div>
+    </header>
+
+    <div class="stats" id="global-stats">
+    </div>
+
+    <div class="folder-tabs-wrap">
+        <div class="folder-tabs" id="folder-tabs">
+            <button class="folder-tab" data-folder="anime">
+                <span class="tab-icon">⛩️</span><span class="tab-label">Anime</span><span class="tab-count"
+                    id="tc-anime">0</span>
+            </button>
+            <button class="folder-tab" data-folder="anime-film">
+                <span class="tab-icon">🎌</span><span class="tab-label">Anime Films</span><span class="tab-count"
+                    id="tc-anime-film">0</span>
+            </button>
+            <button class="folder-tab" data-folder="film">
+                <span class="tab-icon">🎬</span><span class="tab-label">Films</span><span class="tab-count"
+                    id="tc-film">0</span>
+            </button>
+            <button class="folder-tab" data-folder="series">
+                <span class="tab-icon">📺</span><span class="tab-label">Series</span><span class="tab-count"
+                    id="tc-series">0</span>
+            </button>
+        </div>
+    </div>
+
+    <main>
+        <div class="add-section">
+            <div class="add-tabs" id="add-tabs">
+                <button class="add-tab" data-tab="single">+ Single</button>
+                <button class="add-tab" data-tab="bulk">⇅ Bulk Paste</button>
+            </div>
+
+            <div class="tab-panel" id="tab-single">
+                <div class="add-row">
+                    <input type="text" id="inp-title" placeholder="Title (e.g. Attack on Titan, Dune...)" />
+                    <select id="inp-cat">
+                        <option value="anime">Anime Series</option>
+                        <option value="anime-film">Anime Film</option>
+                        <option value="film">Film</option>
+                        <option value="series">Series</option>
+                    </select>
+                    <button class="btn-add" id="btn-add-single">Add</button>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-bulk">
+                <div class="bulk-row">
+                    <select id="bulk-cat">
+                        <option value="anime">Anime Series</option>
+                        <option value="anime-film">Anime Film</option>
+                        <option value="film">Film</option>
+                        <option value="series">Series</option>
+                    </select>
+                </div>
+                <p class="bulk-hint">One title per line. <strong>Duplicates within the same category are
+                        skipped.</strong></p>
+                <textarea id="bulk-input" placeholder="Attack on Titan&#10;Demon Slayer&#10;..."></textarea>
+                <div class="bulk-actions">
+                    <button class="btn-add" id="btn-add-bulk">Add All</button>
+                    <span class="bulk-preview" id="bulk-preview"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-wrap">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                </svg>
+                <input type="text" id="inp-search" placeholder="Search in this folder..." />
+            </div>
+            <select id="inp-sort" class="sort-select">
+                <option value="recent">Recently Added</option>
+                <option value="oldest">Oldest Added</option>
+                <option value="updated">Recently Updated</option>
+                <option value="az">A - Z</option>
+                <option value="za">Z - A</option>
+                <option value="prog-high">Highest Progress</option>
+                <option value="prog-low">Lowest Progress</option>
+            </select>
+        </div>
+
+        <div class="status-pills" id="status-filters">
+            <div class="pill" data-status="all">All</div>
+            <div class="pill" data-status="watching">Watching</div>
+            <div class="pill" data-status="ptw">Plan to Watch</div>
+            <div class="pill" data-status="watched">✓ Watched</div>
+            <div class="pill" data-status="airing">📡 Airing</div>
+        </div>
+
+        <div class="folder-stats" id="folder-stats"></div>
+        <div id="list-container"></div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal">
+            <h3 class="modal-title">Edit Title</h3>
+            <div class="modal-body">
+                <label class="modal-label">Title</label>
+                <input type="text" id="edit-title" class="modal-input" />
+
+                <div id="edit-ep-fields" class="modal-grid hidden">
+                    <div>
+                        <label class="modal-label">Current Season</label>
+                        <input type="number" min="1" id="edit-s-cur" class="modal-input" />
+                    </div>
+                    <div>
+                        <label class="modal-label">Total Seasons</label>
+                        <input type="number" min="1" id="edit-s-tot" class="modal-input" placeholder="?" />
+                    </div>
+                    <div>
+                        <label class="modal-label">Current Ep</label>
+                        <input type="number" min="0" id="edit-ep-cur" class="modal-input" />
+                    </div>
+                    <div>
+                        <label class="modal-label">Total Eps</label>
+                        <input type="number" min="1" id="edit-ep-tot" class="modal-input" placeholder="?" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="btn-modal-cancel">Cancel</button>
+                <button class="btn-save" id="btn-modal-save">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
