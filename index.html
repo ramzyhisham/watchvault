@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D0D1A">
+    <meta name="background-color" content="#0D0D1A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>WatchVault — Your List</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="logo"><span>Watch</span><span>Vault</span></div>
+            <div class="logo-sub">Your Personal Watchlist</div>
+        </div>
+        <nav class="desktop-nav">
+            <button class="nav-item-desktop active" data-tab="home"><i class="fa-solid fa-house"></i> Home</button>
+            <button class="nav-item-desktop" data-tab="anime"><i class="fa-solid fa-torii-gate"></i> Anime</button>
+            <button class="nav-item-desktop" data-tab="series"><i class="fa-solid fa-tv"></i> Series</button>
+            <button class="nav-item-desktop" data-tab="stats"><i class="fa-solid fa-chart-simple"></i> Stats</button>
+            <button class="nav-item-desktop" data-tab="settings"><i class="fa-solid fa-gear"></i> Settings</button>
+        </nav>
+        <div class="header-actions" id="desktop-actions">
+            <button id="btn-install-header" class="btn-icon hidden" title="Install App">📱 Install</button>
+            <button id="btn-export-header" class="btn-icon" title="Export Data">⬇&nbsp;Export</button>
+            <label class="btn-icon" title="Import Data">
+                ⬆&nbsp;Import <input type="file" id="inp-import-header" accept=".json" hidden>
+            </label>
+        </div>
+    </header>
+
+    <main>
+        <!-- HOME VIEW -->
+        <div id="view-home" class="tab-view active">
+            <section class="home-section hidden" id="sec-continue-watching">
+                <h2 class="section-title"><i class="fa-solid fa-play"></i> Continue Watching</h2>
+                <div id="continue-watching-container" class="list"></div>
+            </section>
+
+            <div class="home-grid">
+                <section class="home-section">
+                    <h2 class="section-title"><i class="fa-solid fa-plus-circle"></i> Recently Added</h2>
+                    <div id="recent-added-container" class="list-compact"></div>
+                </section>
+                <section class="home-section">
+                    <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Recently Updated</h2>
+                    <div id="recent-updated-container" class="list-compact"></div>
+                </section>
+            </div>
+        </div>
+
+        <!-- ANIME VIEW -->
+        <div id="view-anime" class="tab-view">
+            <!-- Top sub-tabs for Anime Series vs Anime Films -->
+            <div class="folder-tabs-wrap">
+                <div class="folder-tabs" id="folder-tabs">
+                    <button class="folder-tab active" data-folder="anime">
+                        <span class="tab-icon">⛩️</span><span class="tab-label">Anime Series</span><span class="tab-count" id="tc-anime">0</span>
+                    </button>
+                    <button class="folder-tab" data-folder="anime-film">
+                        <span class="tab-icon">🎌</span><span class="tab-label">Anime Films</span><span class="tab-count" id="tc-anime-film">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Desktop Add Form for Anime -->
+            <div class="add-section desktop-only">
+                <div class="add-tabs" id="add-tabs-anime">
+                    <button class="add-tab active" data-tab="single">+ Single</button>
+                    <button class="add-tab" data-tab="bulk">⇅ Bulk Paste</button>
+                </div>
+                <div class="tab-panel active" id="tab-single-anime">
+                    <div class="add-row">
+                        <input type="text" id="inp-title-anime" placeholder="Title (e.g. Attack on Titan...)" />
+                        <button class="btn-add" id="btn-add-single-anime">Add</button>
+                    </div>
+                </div>
+                <div class="tab-panel" id="tab-bulk-anime">
+                    <p class="bulk-hint">One title per line. Duplicates within Anime are skipped.</p>
+                    <textarea id="bulk-input-anime" placeholder="Attack on Titan&#10;Demon Slayer&#10;..."></textarea>
+                    <div class="bulk-actions">
+                        <button class="btn-add" id="btn-add-bulk-anime">Add All</button>
+                        <span class="bulk-preview" id="bulk-preview-anime"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search, Sort, Filters -->
+            <div class="controls">
+                <div class="search-wrap">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg>
+                    <input type="text" id="inp-search-anime" placeholder="Search in Anime..." />
+                </div>
+                <select id="inp-sort-anime" class="sort-select">
+                    <option value="recent">Recently Added</option>
+                    <option value="oldest">Oldest Added</option>
+                    <option value="updated">Recently Updated</option>
+                    <option value="az">A - Z</option>
+                    <option value="za">Z - A</option>
+                    <option value="prog-high">Highest Progress</option>
+                    <option value="prog-low">Lowest Progress</option>
+                </select>
+            </div>
+            <div class="status-pills" id="status-filters-anime">
+                <div class="pill active" data-status="all">All</div>
+                <div class="pill" data-status="watching">Watching</div>
+                <div class="pill" data-status="ptw">Plan to Watch</div>
+                <div class="pill" data-status="watched">✓ Watched</div>
+                <div class="pill" data-status="airing">📡 Airing</div>
+            </div>
+            <div id="list-container-anime"></div>
+        </div>
+
+        <!-- SERIES VIEW -->
+        <div id="view-series" class="tab-view">
+            <!-- Desktop Add Form for Series -->
+            <div class="add-section desktop-only">
+                <div class="add-tabs" id="add-tabs-series">
+                    <button class="add-tab active" data-tab="single">+ Single</button>
+                    <button class="add-tab" data-tab="bulk">⇅ Bulk Paste</button>
+                </div>
+                <div class="tab-panel active" id="tab-single-series">
+                    <div class="add-row">
+                        <input type="text" id="inp-title-series" placeholder="Title (e.g. Breaking Bad...)" />
+                        <input type="text" id="inp-lang-series" list="languages-list" placeholder="Language (e.g. English...)" />
+                        <button class="btn-add" id="btn-add-single-series">Add</button>
+                    </div>
+                </div>
+                <div class="tab-panel" id="tab-bulk-series">
+                    <p class="bulk-hint">One title per line. Duplicates within Series are skipped.</p>
+                    <textarea id="bulk-input-series" placeholder="Breaking Bad&#10;Lucifer&#10;..."></textarea>
+                    <div class="bulk-actions">
+                        <button class="btn-add" id="btn-add-bulk-series">Add All</button>
+                        <span class="bulk-preview" id="bulk-preview-series"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search, Sort, Language and Status Filters -->
+            <div class="controls">
+                <div class="search-wrap">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg>
+                    <input type="text" id="inp-search-series" placeholder="Search in Series..." />
+                </div>
+                <select id="inp-lang-filter-series" class="sort-select">
+                    <option value="all">All Languages</option>
+                </select>
+                <select id="inp-sort-series" class="sort-select">
+                    <option value="recent">Recently Added</option>
+                    <option value="oldest">Oldest Added</option>
+                    <option value="updated">Recently Updated</option>
+                    <option value="az">A - Z</option>
+                    <option value="za">Z - A</option>
+                    <option value="prog-high">Highest Progress</option>
+                    <option value="prog-low">Lowest Progress</option>
+                </select>
+            </div>
+            <div class="status-pills" id="status-filters-series">
+                <div class="pill active" data-status="all">All</div>
+                <div class="pill" data-status="watching">Watching</div>
+                <div class="pill" data-status="ptw">Plan to Watch</div>
+                <div class="pill" data-status="watched">✓ Watched</div>
+                <div class="pill" data-status="airing">📡 Airing</div>
+            </div>
+            <div id="list-container-series"></div>
+        </div>
+
+        <!-- STATISTICS VIEW -->
+        <div id="view-stats" class="tab-view">
+            <h2 class="section-title"><i class="fa-solid fa-chart-simple"></i> Dashboard Statistics</h2>
+            <div class="stats-dashboard" id="stats-dashboard-grid">
+                <!-- Stats widgets injected by JS -->
+            </div>
+        </div>
+
+        <!-- SETTINGS VIEW -->
+        <div id="view-settings" class="tab-view">
+            <h2 class="section-title"><i class="fa-solid fa-gear"></i> Settings</h2>
+            <div class="settings-card">
+                <h3>Data Backups</h3>
+                <p class="settings-desc">Keep your watchlist safe by exporting a local JSON file, or restore a backup.</p>
+                <div class="settings-actions">
+                    <button id="btn-export-settings" class="btn-primary"><i class="fa-solid fa-download"></i> Export Data Backup</button>
+                    <label class="btn-secondary">
+                        <i class="fa-solid fa-upload"></i> Import Data Backup
+                        <input type="file" id="inp-import-settings" accept=".json" hidden>
+                    </label>
+                </div>
+            </div>
+            <div class="settings-card hidden" id="settings-pwa-install-card">
+                <h3>Application Installation</h3>
+                <p class="settings-desc">Install WatchVault as a standalone PWA on your device for a native experience.</p>
+                <div class="settings-actions">
+                    <button id="btn-install-settings" class="btn-primary"><i class="fa-solid fa-mobile-screen-button"></i> Install WatchVault</button>
+                </div>
+            </div>
+            <div class="settings-card">
+                <h3>About</h3>
+                <p class="settings-desc">WatchVault v2.0 — Premium Watchlist Tracking. Keep all your anime and series organized offline-first.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Add Button (Mobile) -->
+    <button class="fab-add" id="fab-add-btn" title="Add Title"><i class="fa-solid fa-plus"></i></button>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-tab="home">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </button>
+        <button class="nav-item" data-tab="anime">
+            <i class="fa-solid fa-torii-gate"></i>
+            <span>Anime</span>
+        </button>
+        <button class="nav-item" data-tab="series">
+            <i class="fa-solid fa-tv"></i>
+            <span>Series</span>
+        </button>
+        <button class="nav-item" data-tab="stats">
+            <i class="fa-solid fa-chart-simple"></i>
+            <span>Stats</span>
+        </button>
+        <button class="nav-item" data-tab="settings">
+            <i class="fa-solid fa-gear"></i>
+            <span>Settings</span>
+        </button>
+    </nav>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Edit Modal Overlay -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal">
+            <h3 class="modal-title">Edit Title</h3>
+            <div class="modal-body">
+                <label class="modal-label">Title</label>
+                <input type="text" id="edit-title" class="modal-input" />
+
+                <div id="edit-lang-field" class="hidden" style="margin-bottom: 12px;">
+                    <label class="modal-label">Language</label>
+                    <input type="text" id="edit-lang" list="languages-list" class="modal-input" placeholder="e.g. English, Korean..." style="width: 100%;" />
+                </div>
+
+                <div id="edit-ep-fields" class="modal-grid hidden">
+                    <div>
+                        <label class="modal-label">Current Season</label>
+                        <input type="number" min="1" id="edit-s-cur" class="modal-input" />
+                    </div>
+                    <div>
+                        <label class="modal-label">Total Seasons</label>
+                        <input type="number" min="1" id="edit-s-tot" class="modal-input" placeholder="?" />
+                    </div>
+                    <div>
+                        <label class="modal-label">Current Ep</label>
+                        <input type="number" min="0" id="edit-ep-cur" class="modal-input" />
+                    </div>
+                    <div>
+                        <label class="modal-label">Total Eps</label>
+                        <input type="number" min="1" id="edit-ep-tot" class="modal-input" placeholder="?" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="btn-modal-cancel">Cancel</button>
+                <button class="btn-save" id="btn-modal-save">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Title Modal Overlay (Mobile) -->
+    <div class="modal-overlay" id="add-modal">
+        <div class="modal">
+            <h3 class="modal-title">Add Title</h3>
+            <div class="modal-body">
+                <label class="modal-label">Title</label>
+                <input type="text" id="add-title" class="modal-input" placeholder="e.g. Attack on Titan, Breaking Bad..." />
+
+                <label class="modal-label">Category</label>
+                <select id="add-cat" class="modal-input">
+                    <option value="anime">Anime Series</option>
+                    <option value="anime-film">Anime Film</option>
+                    <option value="series">Series</option>
+                </select>
+
+                <div id="add-lang-field" class="hidden" style="margin-top: 12px;">
+                    <label class="modal-label">Language</label>
+                    <input type="text" id="add-lang" list="languages-list" class="modal-input" placeholder="e.g. English, Korean..." style="width: 100%;" />
+                </div>
+            </div>
+            <div class="modal-actions" style="margin-top: 10px;">
+                <button class="btn-cancel" id="btn-add-cancel">Cancel</button>
+                <button class="btn-save" id="btn-add-save">Add Title</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal">
+            <h3 class="modal-title">Delete Title</h3>
+            <div class="modal-body">
+                <p style="font-size: 14px; color: var(--text); line-height: 1.5; margin-bottom: 8px;">
+                    Are you sure you want to delete <strong id="confirm-item-title" style="color: var(--fuchsia);"></strong>?
+                </p>
+                <p style="font-size: 12px; color: var(--muted);">
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn-cancel" id="btn-confirm-cancel">Cancel</button>
+                <button class="btn-save btn-delete-confirm" id="btn-confirm-delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Datalist for Language autocomplete -->
+    <datalist id="languages-list">
+        <option value="English"></option>
+        <option value="Korean"></option>
+        <option value="Turkish"></option>
+        <option value="Japanese"></option>
+        <option value="Spanish"></option>
+        <option value="French"></option>
+        <option value="German"></option>
+        <option value="Hindi"></option>
+    </datalist>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
