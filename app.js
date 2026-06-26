@@ -906,28 +906,46 @@ function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
 }
 
-function showToast(msg) {
+function showToast(msg, duration = 2800) {
     const t = document.getElementById('toast');
+    if (!t) return;
     t.innerHTML = msg;
     t.classList.add('show');
     clearTimeout(window.toastTimer);
-    window.toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    if (duration > 0) {
+        window.toastTimer = setTimeout(() => t.classList.remove('show'), duration);
+    }
 }
 
 // --- PWA LOGIC ---
 function registerPWA() {
+    // Check if running in standalone display mode
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('service-worker.js')
             .then(reg => {
                 reg.onupdatefound = () => {
                     const installingWorker = reg.installing;
-                    installingWorker.onstatechange = () => {
-                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            showToast('A new version is available! <button class="toast-undo" onclick="window.location.reload()">Refresh</button>');
-                        }
-                    };
+                    if (installingWorker) {
+                        installingWorker.onstatechange = () => {
+                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Show update toast that stays open (duration = 0) with a Refresh button
+                                showToast('New version available. <button class="toast-undo" onclick="window.location.reload()">Refresh</button>', 0);
+                            }
+                        };
+                    }
                 };
             }).catch(console.error);
+    }
+
+    if (isStandalone) {
+        console.log('[PWA] Running in standalone mode. Hiding install options.');
+        const btnHeader = document.getElementById('btn-install-header');
+        if (btnHeader) btnHeader.classList.add('hidden');
+        const installCard = document.getElementById('settings-pwa-install-card');
+        if (installCard) installCard.classList.add('hidden');
+        return;
     }
 
     // Capture install prompt
@@ -937,12 +955,28 @@ function registerPWA() {
         
         // Show install button in header (on desktop) and in settings card (always)
         const btnHeader = document.getElementById('btn-install-header');
-        btnHeader.classList.remove('hidden');
-        btnHeader.onclick = executeInstallPrompt;
+        if (btnHeader) {
+            btnHeader.classList.remove('hidden');
+            btnHeader.onclick = executeInstallPrompt;
+        }
         
         const installCard = document.getElementById('settings-pwa-install-card');
-        installCard.classList.remove('hidden');
-        document.getElementById('btn-install-settings').onclick = executeInstallPrompt;
+        const btnSettings = document.getElementById('btn-install-settings');
+        if (installCard && btnSettings) {
+            installCard.classList.remove('hidden');
+            btnSettings.onclick = executeInstallPrompt;
+        }
+    });
+
+    // Handle standard app installed event (e.g. installed from browser menu)
+    window.addEventListener('appinstalled', () => {
+        console.log('[PWA] App installed successfully');
+        const btnHeader = document.getElementById('btn-install-header');
+        if (btnHeader) btnHeader.classList.add('hidden');
+        const installCard = document.getElementById('settings-pwa-install-card');
+        if (installCard) installCard.classList.add('hidden');
+        deferredPrompt = null;
+        showToast('WatchVault installed successfully!');
     });
 }
 
@@ -950,9 +984,12 @@ async function executeInstallPrompt() {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
+    console.log(`[PWA] Install choice outcome: ${outcome}`);
     if (outcome === 'accepted') {
-        document.getElementById('btn-install-header').classList.add('hidden');
-        document.getElementById('settings-pwa-install-card').classList.add('hidden');
+        const btnHeader = document.getElementById('btn-install-header');
+        if (btnHeader) btnHeader.classList.add('hidden');
+        const installCard = document.getElementById('settings-pwa-install-card');
+        if (installCard) installCard.classList.add('hidden');
     }
     deferredPrompt = null;
 }
