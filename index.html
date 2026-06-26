@@ -293,26 +293,60 @@
     <!-- Add Title Modal Overlay (Mobile) -->
     <div class="modal-overlay" id="add-modal">
         <div class="modal">
-            <h3 class="modal-title">Add Title</h3>
-            <div class="modal-body">
-                <label class="modal-label">Title</label>
-                <input type="text" id="add-title" class="modal-input" placeholder="e.g. Attack on Titan, Breaking Bad..." />
+            <h3 class="modal-title" style="margin-bottom: 12px;">Add Title</h3>
+            
+            <div class="add-tabs" id="modal-add-tabs" style="margin-bottom: 16px;">
+                <button class="add-tab active" data-tab="single">+ Single</button>
+                <button class="add-tab" data-tab="bulk">⇅ Bulk Paste</button>
+            </div>
+            
+            <!-- Single Add Panel -->
+            <div class="tab-panel active" id="modal-tab-single">
+                <div class="modal-body" style="padding: 0;">
+                    <label class="modal-label">Title</label>
+                    <input type="text" id="add-title" class="modal-input" placeholder="e.g. Attack on Titan, Breaking Bad..." />
 
-                <label class="modal-label">Category</label>
-                <select id="add-cat" class="modal-input">
-                    <option value="anime">Anime Series</option>
-                    <option value="anime-film">Anime Film</option>
-                    <option value="series">Series</option>
-                </select>
+                    <label class="modal-label">Category</label>
+                    <select id="add-cat" class="modal-input">
+                        <option value="anime">Anime Series</option>
+                        <option value="anime-film">Anime Film</option>
+                        <option value="series">Series</option>
+                    </select>
 
-                <div id="add-lang-field" class="hidden" style="margin-top: 12px;">
-                    <label class="modal-label">Language</label>
-                    <input type="text" id="add-lang" list="languages-list" class="modal-input" placeholder="e.g. English, Korean..." style="width: 100%;" />
+                    <div id="add-lang-field" class="hidden" style="margin-top: 12px;">
+                        <label class="modal-label">Language</label>
+                        <input type="text" id="add-lang" list="languages-list" class="modal-input" placeholder="e.g. English, Korean..." style="width: 100%;" />
+                    </div>
                 </div>
             </div>
-            <div class="modal-actions" style="margin-top: 10px;">
+
+            <!-- Bulk Paste Panel -->
+            <div class="tab-panel" id="modal-tab-bulk">
+                <div class="modal-body" style="padding: 0;">
+                    <p class="bulk-hint" style="font-size: 11px; color: var(--muted); margin-bottom: 8px;">
+                        One title per line. Duplicates within category are skipped.
+                    </p>
+                    <label class="modal-label">Titles</label>
+                    <textarea id="add-bulk-textarea" class="modal-input" placeholder="One title per line..." style="width: 100%; min-height: 110px; resize: vertical; margin-bottom: 12px; font-family: inherit; font-size: 14px; padding: 10px; line-height: 1.5;"></textarea>
+
+                    <label class="modal-label">Category</label>
+                    <select id="add-bulk-cat" class="modal-input">
+                        <option value="anime">Anime Series</option>
+                        <option value="anime-film">Anime Film</option>
+                        <option value="series">Series</option>
+                    </select>
+
+                    <div id="add-bulk-lang-field" class="hidden" style="margin-top: 12px;">
+                        <label class="modal-label">Language</label>
+                        <input type="text" id="add-bulk-lang" list="languages-list" class="modal-input" placeholder="e.g. English, Korean..." style="width: 100%;" />
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 16px;">
                 <button class="btn-cancel" id="btn-add-cancel">Cancel</button>
                 <button class="btn-save" id="btn-add-save">Add Title</button>
+                <button class="btn-save hidden" id="btn-add-bulk-save">Add All</button>
             </div>
         </div>
     </div>

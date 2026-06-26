@@ -149,6 +149,25 @@ function bindEvents() {
         }
     });
 
+    // Add Mobile Single/Bulk Tab Toggles
+    document.querySelectorAll('#modal-add-tabs .add-tab').forEach(t => {
+        t.addEventListener('click', () => switchMobileAddTab(t.dataset.tab));
+    });
+
+    // Mobile Add Bulk Category Change
+    document.getElementById('add-bulk-cat').addEventListener('change', (e) => {
+        const langField = document.getElementById('add-bulk-lang-field');
+        if (e.target.value === 'series') {
+            langField.classList.remove('hidden');
+        } else {
+            langField.classList.add('hidden');
+            document.getElementById('add-bulk-lang').value = '';
+        }
+    });
+
+    // Mobile Add Bulk Execute
+    document.getElementById('btn-add-bulk-save').addEventListener('click', executeMobileBulkAdd);
+
     // Edit Modal Actions
     document.getElementById('btn-modal-cancel').addEventListener('click', closeModal);
     document.getElementById('btn-modal-save').addEventListener('click', saveModal);
@@ -343,10 +362,85 @@ function executeAddModal() {
     showToast('Added: ' + title);
 }
 
+function switchMobileAddTab(tab) {
+    document.querySelectorAll('#modal-add-tabs .add-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+    });
+    document.getElementById('modal-tab-single').classList.toggle('active', tab === 'single');
+    document.getElementById('modal-tab-bulk').classList.toggle('active', tab === 'bulk');
+    
+    const btnSaveSingle = document.getElementById('btn-add-save');
+    const btnSaveBulk = document.getElementById('btn-add-bulk-save');
+    
+    if (tab === 'single') {
+        btnSaveSingle.classList.remove('hidden');
+        btnSaveBulk.classList.add('hidden');
+        document.getElementById('add-title').focus();
+    } else {
+        btnSaveSingle.classList.add('hidden');
+        btnSaveBulk.classList.remove('hidden');
+        document.getElementById('add-bulk-textarea').focus();
+    }
+}
+
+function executeMobileBulkAdd() {
+    const bulkInp = document.getElementById('add-bulk-textarea');
+    const lines = bulkInp.value.split('\n').map(l => l.trim()).filter(l => l);
+    if (!lines.length) return bulkInp.focus();
+
+    const cat = document.getElementById('add-bulk-cat').value;
+    const existing = new Set(state.items.filter(i => i.cat === cat).map(i => i.title.toLowerCase()));
+
+    let lang = null;
+    if (cat === 'series') {
+        lang = document.getElementById('add-bulk-lang').value.trim() || null;
+    }
+
+    let added = 0;
+    lines.forEach(title => {
+        if (!existing.has(title.toLowerCase())) {
+            existing.add(title.toLowerCase());
+            createItem(title, cat, lang, false);
+            added++;
+        }
+    });
+
+    if (added > 0) {
+        bulkInp.value = '';
+        if (cat === 'series') {
+            document.getElementById('add-bulk-lang').value = '';
+        }
+        saveState();
+        closeAddModal();
+        
+        // Route view to the new items
+        if (cat === 'series') {
+            switchTab('series');
+        } else {
+            switchTab('anime');
+            switchFolder(cat);
+        }
+        showToast(`Added ${added} titles!`);
+    } else {
+        showToast('No new titles added (all duplicates).');
+    }
+}
+
 function closeAddModal() {
     document.getElementById('add-modal').classList.remove('active');
     document.getElementById('add-title').value = '';
     document.getElementById('add-lang').value = '';
+    document.getElementById('add-bulk-textarea').value = '';
+    document.getElementById('add-bulk-lang').value = '';
+    
+    // Reset category dropdowns to default ('anime') and hide language fields
+    document.getElementById('add-cat').value = 'anime';
+    document.getElementById('add-lang-field').classList.add('hidden');
+    document.getElementById('add-bulk-cat').value = 'anime';
+    document.getElementById('add-bulk-lang-field').classList.add('hidden');
+    
+    // Revert tab back to single tab view
+    switchMobileAddTab('single');
 }
 
 function createItem(title, cat, lang = null, autoSave = true) {
