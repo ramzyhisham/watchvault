@@ -823,6 +823,7 @@ function generateCard(i) {
     if (isWatching) badges += `<span class="badge watching">Watching</span>`;
     if (isPTW) badges += `<span class="badge ptw">Plan to Watch</span>`;
     if (i.airing && !isWatched) badges += `<span class="badge airing">Airing</span>`;
+    if (isWatched) badges += `<span class="badge watched">Watched</span>`;
     if (i.cat === 'series' && i.lang) {
         badges += `<span class="badge language">${escapeHTML(i.lang)}</span>`;
     }
