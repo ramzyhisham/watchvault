@@ -1145,6 +1145,92 @@ textarea:focus {
     font-weight: bold;
 }
 
+/* PWA Update Banner */
+.pwa-banner {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    background: linear-gradient(135deg, var(--card2) 0%, rgba(26, 26, 53, 0.95) 100%);
+    border: 1px solid var(--violet);
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 1100;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(12px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.pwa-banner.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.pwa-banner-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pwa-banner-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.pwa-banner-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+}
+
+.pwa-banner-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-pwa-update,
+.btn-pwa-later {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.btn-pwa-update {
+    background: linear-gradient(135deg, var(--fuchsia), var(--violet));
+    color: white;
+}
+
+.btn-pwa-update:hover {
+    opacity: 0.9;
+}
+
+.btn-pwa-later {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+}
+
+.btn-pwa-later:hover {
+    color: var(--text);
+    border-color: var(--muted);
+}
+
 /* Responsive Rules */
 @media (min-width: 581px) {
     main {
@@ -1272,5 +1358,9 @@ textarea:focus {
     .home-grid {
         grid-template-columns: 1fr;
         gap: 16px;
+    }
+
+    .pwa-banner {
+        bottom: 85px; /* Above mobile bottom nav */
     }
 }

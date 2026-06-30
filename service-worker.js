@@ -1,4 +1,4 @@
-const CACHE_NAME = 'watchvault-v2-cache-v7';
+const CACHE_NAME = 'watchvault-v2.0.1';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -17,7 +17,6 @@ const ASSETS_TO_CACHE = [
 
 // Install Event - Cache Core Assets
 self.addEventListener('install', event => {
-    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
@@ -26,6 +25,13 @@ self.addEventListener('install', event => {
             })
             .catch(err => console.error('[SW] Cache Error:', err))
     );
+});
+
+// Message Event - Skip Waiting
+self.addEventListener('message', event => {
+    if (event.data && event.data.action === 'skipWaiting') {
+        self.skipWaiting();
+    }
 });
 
 // Activate Event - Clean Up Old Caches & Claim Clients

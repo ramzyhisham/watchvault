@@ -1016,17 +1016,32 @@ function showToast(msg, duration = 2800) {
 function registerPWA() {
     // Check if running in standalone display mode
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    let refreshing = false;
+
+    // Handle controller change (reloads page once a waiting service worker activates)
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+        }
+    });
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('service-worker.js')
             .then(reg => {
+                // 1. Check if there is already a service worker waiting in the background
+                if (reg.waiting) {
+                    showUpdateBanner(reg.waiting);
+                }
+
+                // 2. Listen for new service workers installing
                 reg.onupdatefound = () => {
                     const installingWorker = reg.installing;
                     if (installingWorker) {
                         installingWorker.onstatechange = () => {
                             if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                // Show update toast that stays open (duration = 0) with a Refresh button
-                                showToast('New version available. <button class="toast-undo" onclick="window.location.reload()">Refresh</button>', 0);
+                                // A new service worker is installed and waiting
+                                showUpdateBanner(installingWorker);
                             }
                         };
                     }
@@ -1073,6 +1088,33 @@ function registerPWA() {
         deferredPrompt = null;
         showToast('WatchVault installed successfully!');
     });
+}
+
+function showUpdateBanner(waitingWorker) {
+    const banner = document.getElementById('pwa-update-banner');
+    const btnUpdate = document.getElementById('btn-pwa-update');
+    const btnLater = document.getElementById('btn-pwa-later');
+    
+    if (!banner || !btnUpdate || !btnLater) return;
+
+    // Display the banner
+    banner.classList.remove('hidden');
+    // Force browser reflow to allow the transition animation
+    banner.offsetHeight;
+    banner.classList.add('show');
+
+    // Trigger update on click
+    btnUpdate.onclick = () => {
+        waitingWorker.postMessage({ action: 'skipWaiting' });
+        banner.classList.remove('show');
+        setTimeout(() => banner.classList.add('hidden'), 300);
+    };
+
+    // Trigger later on click (dismiss)
+    btnLater.onclick = () => {
+        banner.classList.remove('show');
+        setTimeout(() => banner.classList.add('hidden'), 300);
+    };
 }
 
 async function executeInstallPrompt() {
