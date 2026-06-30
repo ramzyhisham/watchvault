@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "jimp": "^0.22.10"
+  },
+  "devDependencies": {
+    "puppeteer": "^25.2.1"
   }
 }
