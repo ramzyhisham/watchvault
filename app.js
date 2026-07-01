@@ -35,12 +35,45 @@ function init() {
     registerPWA();
 }
 
+function generateUniqueId() {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+    return 'wv_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+}
+
 function loadState() {
     try {
         state.items = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     } catch {
         state.items = [];
     }
+
+    // Ensure all items have a unique, persistent string ID
+    const seenIds = new Set();
+    let migrated = false;
+    state.items.forEach(item => {
+        if (!item.id || typeof item.id !== 'string' || seenIds.has(item.id)) {
+            let newId;
+            if (item.id && typeof item.id === 'number') {
+                newId = String(item.id);
+            } else if (item.id) {
+                newId = String(item.id);
+            } else {
+                newId = generateUniqueId();
+            }
+            if (seenIds.has(newId)) {
+                newId = generateUniqueId();
+            }
+            item.id = newId;
+            migrated = true;
+        }
+        seenIds.add(item.id);
+    });
+    if (migrated) {
+        saveState();
+    }
+
     try {
         prefs = { ...prefs, ...JSON.parse(localStorage.getItem(PREFS_KEY)) };
     } catch {
@@ -445,7 +478,7 @@ function closeAddModal() {
 
 function createItem(title, cat, lang = null, autoSave = true) {
     state.items.unshift({
-        id: Date.now() + Math.random(),
+        id: generateUniqueId(),
         title, cat, lang,
         done: false,
         airing: false,
@@ -462,6 +495,7 @@ window.openEdit = function (id) {
     const item = state.items.find(i => i.id === id);
     if (!item) return;
     editingId = id;
+    console.log(`[DEBUG] Edit Modal Opened: Title="${item.title}", Item ID="${item.id}", Edit Modal ID="${editingId}"`);
 
     document.getElementById('edit-title').value = item.title;
     const epFields = document.getElementById('edit-ep-fields');
@@ -496,6 +530,7 @@ function closeModal() {
 function saveModal() {
     const item = state.items.find(i => i.id === editingId);
     if (!item) return closeModal();
+    console.log(`[DEBUG] Save Changes Action: Title="${item.title}", Item ID="${item.id}", Edit Modal ID="${editingId}"`);
 
     const newTitle = document.getElementById('edit-title').value.trim();
     if (!newTitle) return;
@@ -536,6 +571,7 @@ function saveModal() {
 window.changeEp = function (id, delta) {
     const item = state.items.find(i => i.id === id);
     if (!item) return;
+    console.log(`[DEBUG] Episode Action: Title="${item.title}", Item ID="${item.id}", Action ID="${id}", Delta=${delta}`);
     
     const oldEp = item.epCur || 0;
     item.epCur = Math.max(0, oldEp + delta);
@@ -554,6 +590,8 @@ window.changeEp = function (id, delta) {
 window.toggleWatched = function (id) {
     const item = state.items.find(i => i.id === id);
     if (!item) return;
+    console.log(`[DEBUG] Status Action (Watched Toggle): Title="${item.title}", Item ID="${item.id}", Action ID="${id}"`);
+    
     item.done = !item.done;
     if (item.done) {
         item.airing = false;
@@ -569,6 +607,8 @@ window.toggleWatched = function (id) {
 window.toggleAiring = function (id) {
     const item = state.items.find(i => i.id === id);
     if (!item || item.done) return;
+    console.log(`[DEBUG] Status Action (Airing Toggle): Title="${item.title}", Item ID="${item.id}", Action ID="${id}"`);
+    
     item.airing = !item.airing;
     item.updated = new Date().toISOString();
     saveState();
@@ -580,6 +620,8 @@ window.confirmDelete = function (id) {
     const item = state.items.find(i => i.id === id);
     if (!item) return;
     deleteTargetId = id;
+    console.log(`[DEBUG] Delete Confirmation Opened: Title="${item.title}", Item ID="${item.id}", Delete Target ID="${deleteTargetId}"`);
+    
     document.getElementById('confirm-item-title').textContent = item.title;
     document.getElementById('confirm-modal').classList.add('active');
 };
@@ -592,6 +634,9 @@ function closeConfirmModal() {
 window.deleteItem = function (id) {
     const idx = state.items.findIndex(i => i.id === id);
     if (idx === -1) return;
+    const item = state.items[idx];
+    console.log(`[DEBUG] Delete Action: Title="${item.title}", Item ID="${item.id}", Delete Action ID="${id}"`);
+    
     state.deletedCache = { item: state.items[idx], index: idx };
     state.items.splice(idx, 1);
     saveState();
@@ -846,22 +891,22 @@ function generateCard(i) {
                 <div class="ep-progress-bar" style="width: ${progress}%"></div>
             </div>
             <div class="ep-controls">
-                <button class="btn-ep" onclick="changeEp(${i.id}, -1)">−</button>
-                <button class="btn-ep" onclick="changeEp(${i.id}, 1)">+</button>
+                <button class="btn-ep" onclick="changeEp('${i.id}', -1)">−</button>
+                <button class="btn-ep" onclick="changeEp('${i.id}', 1)">+</button>
             </div>
         </div>
       </div>`;
     }
 
     const airingBtnHtml = EP_CATS.has(i.cat) ? `
-      <button class="btn-action" onclick="toggleAiring(${i.id})" title="Toggle Airing" ${isWatched ? 'disabled' : ''}>
+      <button class="btn-action" onclick="toggleAiring('${i.id}')" title="Toggle Airing" ${isWatched ? 'disabled' : ''}>
         <i class="fa-solid fa-satellite-dish"></i>
       </button>` : '';
 
     return `
     <div class="card ${isWatched ? 'watched' : ''} ${i.airing && !isWatched ? 'airing' : ''}">
       <label class="card-checkbox-label" title="${isWatched ? 'Mark Unwatched' : 'Mark Watched'}">
-        <input type="checkbox" class="card-checkbox" ${isWatched ? 'checked' : ''} onchange="toggleWatched(${i.id})">
+        <input type="checkbox" class="card-checkbox" ${isWatched ? 'checked' : ''} onchange="toggleWatched('${i.id}')">
         <span class="custom-checkbox"></span>
       </label>
       <div class="card-body">
@@ -876,8 +921,8 @@ function generateCard(i) {
       </div>
       <div class="card-actions">
         ${airingBtnHtml}
-        <button class="btn-action" onclick="openEdit(${i.id})" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
-        <button class="btn-action del" onclick="confirmDelete(${i.id})" title="Delete"><i class="fa-solid fa-trash"></i></button>
+        <button class="btn-action" onclick="openEdit('${i.id}')" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+        <button class="btn-action del" onclick="confirmDelete('${i.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
       </div>
     </div>`;
 }
@@ -909,9 +954,9 @@ function generateCWCard(i) {
                     <div class="ep-progress-bar" style="width: ${progress}%"></div>
                 </div>
                 <div class="ep-controls">
-                    <button class="btn-ep" onclick="changeEp(${i.id}, -1)">−</button>
+                    <button class="btn-ep" onclick="changeEp('${i.id}', -1)">−</button>
                     <span style="font-size: 11px; font-weight: 700; font-family: 'Space Grotesk', sans-serif; color: var(--muted); min-width: 26px; text-align: center;">${cur}</span>
-                    <button class="btn-ep" onclick="changeEp(${i.id}, 1)">+</button>
+                    <button class="btn-ep" onclick="changeEp('${i.id}', 1)">+</button>
                 </div>
             </div>
         </div>
@@ -1011,6 +1056,58 @@ function showToast(msg, duration = 2800) {
         window.toastTimer = setTimeout(() => t.classList.remove('show'), duration);
     }
 }
+
+window.generateTestData = function (count = 350) {
+    const categories = ['anime', 'anime-film', 'series'];
+    const languages = ['English', 'Japanese', 'Korean', 'Spanish', 'French'];
+    const baseTitles = [
+        "Attack on Titan", "Demon Slayer", "Frieren", "Jujutsu Kaisen", "One Piece",
+        "Naruto", "Death Note", "Breaking Bad", "Stranger Things", "Better Call Saul",
+        "The Beginning After the End", "Classroom of the Elite", "Spy x Family", 
+        "My Hero Academia", "Vinland Saga", "Monster", "Steins;Gate", "Fullmetal Alchemist",
+        "Cyberpunk: Edgerunners", "Chainsaw Man"
+    ];
+    
+    state.items = [];
+    
+    for (let i = 0; i < count; i++) {
+        const baseTitle = baseTitles[i % baseTitles.length];
+        const cat = categories[Math.floor(Math.random() * categories.length)];
+        const title = `${baseTitle} (Test Vol ${Math.floor(i / baseTitles.length) + 1})`;
+        
+        let lang = null;
+        if (cat === 'series') {
+            lang = languages[Math.floor(Math.random() * languages.length)];
+        }
+        
+        const isWatched = Math.random() < 0.25;
+        const isWatching = !isWatched && Math.random() < 0.5;
+        const airing = !isWatched && Math.random() < 0.3;
+        
+        const epTot = Math.floor(Math.random() * 24) + 12;
+        const epCur = isWatched ? epTot : (isWatching ? Math.floor(Math.random() * epTot) : 0);
+        
+        state.items.push({
+            id: generateUniqueId(),
+            title,
+            cat,
+            lang,
+            done: isWatched,
+            airing,
+            added: new Date(Date.now() - Math.random() * 30 * 24 * 3600 * 1000).toISOString(),
+            updated: new Date(Date.now() - Math.random() * 24 * 3600 * 1000).toISOString(),
+            sCur: Math.floor(Math.random() * 4) + 1,
+            sTot: Math.floor(Math.random() * 3) + 4,
+            epCur,
+            epTot
+        });
+    }
+    
+    saveState();
+    renderActiveTab();
+    console.log(`[TEST] Generated ${state.items.length} test items successfully.`);
+    return `Generated ${state.items.length} test items.`;
+};
 
 // --- PWA LOGIC ---
 function registerPWA() {
