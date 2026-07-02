@@ -100,32 +100,34 @@
             </div>
 
             <!-- Search, Sort, Filters -->
-            <div class="controls">
-                <div class="search-wrap">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8" />
-                        <path d="m21 21-4.35-4.35" />
-                    </svg>
-                    <input type="text" id="inp-search-anime" placeholder="Search in Anime..." />
+            <div class="sticky-filter-bar">
+                <div class="controls">
+                    <div class="search-wrap">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.35-4.35" />
+                        </svg>
+                        <input type="text" id="inp-search-anime" placeholder="Search in Anime..." />
+                    </div>
+                    <select id="inp-sort-anime" class="sort-select">
+                        <option value="recent">Recently Added</option>
+                        <option value="oldest">Oldest Added</option>
+                        <option value="updated">Recently Updated</option>
+                        <option value="az">A - Z</option>
+                        <option value="za">Z - A</option>
+                        <option value="prog-high">Highest Progress</option>
+                        <option value="prog-low">Lowest Progress</option>
+                    </select>
                 </div>
-                <select id="inp-sort-anime" class="sort-select">
-                    <option value="recent">Recently Added</option>
-                    <option value="oldest">Oldest Added</option>
-                    <option value="updated">Recently Updated</option>
-                    <option value="az">A - Z</option>
-                    <option value="za">Z - A</option>
-                    <option value="prog-high">Highest Progress</option>
-                    <option value="prog-low">Lowest Progress</option>
-                </select>
+                <div class="status-pills" id="status-filters-anime">
+                    <div class="pill active" data-status="all">All</div>
+                    <div class="pill" data-status="watching">Watching</div>
+                    <div class="pill" data-status="ptw">Plan to Watch</div>
+                    <div class="pill" data-status="watched">✓ Watched</div>
+                    <div class="pill" data-status="airing">📡 Airing</div>
+                </div>
             </div>
-            <div class="status-pills" id="status-filters-anime">
-                <div class="pill active" data-status="all">All</div>
-                <div class="pill" data-status="watching">Watching</div>
-                <div class="pill" data-status="ptw">Plan to Watch</div>
-                <div class="pill" data-status="watched">✓ Watched</div>
-                <div class="pill" data-status="airing">📡 Airing</div>
-            </div>
-            <div id="list-container-anime"></div>
+            <div id="list-container-anime" class="list-container"></div>
         </div>
 
         <!-- SERIES VIEW -->
@@ -154,35 +156,37 @@
             </div>
 
             <!-- Search, Sort, Language and Status Filters -->
-            <div class="controls">
-                <div class="search-wrap">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8" />
-                        <path d="m21 21-4.35-4.35" />
-                    </svg>
-                    <input type="text" id="inp-search-series" placeholder="Search in Series..." />
+            <div class="sticky-filter-bar">
+                <div class="controls">
+                    <div class="search-wrap">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.35-4.35" />
+                        </svg>
+                        <input type="text" id="inp-search-series" placeholder="Search in Series..." />
+                    </div>
+                    <select id="inp-lang-filter-series" class="sort-select">
+                        <option value="all">All Languages</option>
+                    </select>
+                    <select id="inp-sort-series" class="sort-select">
+                        <option value="recent">Recently Added</option>
+                        <option value="oldest">Oldest Added</option>
+                        <option value="updated">Recently Updated</option>
+                        <option value="az">A - Z</option>
+                        <option value="za">Z - A</option>
+                        <option value="prog-high">Highest Progress</option>
+                        <option value="prog-low">Lowest Progress</option>
+                    </select>
                 </div>
-                <select id="inp-lang-filter-series" class="sort-select">
-                    <option value="all">All Languages</option>
-                </select>
-                <select id="inp-sort-series" class="sort-select">
-                    <option value="recent">Recently Added</option>
-                    <option value="oldest">Oldest Added</option>
-                    <option value="updated">Recently Updated</option>
-                    <option value="az">A - Z</option>
-                    <option value="za">Z - A</option>
-                    <option value="prog-high">Highest Progress</option>
-                    <option value="prog-low">Lowest Progress</option>
-                </select>
+                <div class="status-pills" id="status-filters-series">
+                    <div class="pill active" data-status="all">All</div>
+                    <div class="pill" data-status="watching">Watching</div>
+                    <div class="pill" data-status="ptw">Plan to Watch</div>
+                    <div class="pill" data-status="watched">✓ Watched</div>
+                    <div class="pill" data-status="airing">📡 Airing</div>
+                </div>
             </div>
-            <div class="status-pills" id="status-filters-series">
-                <div class="pill active" data-status="all">All</div>
-                <div class="pill" data-status="watching">Watching</div>
-                <div class="pill" data-status="ptw">Plan to Watch</div>
-                <div class="pill" data-status="watched">✓ Watched</div>
-                <div class="pill" data-status="airing">📡 Airing</div>
-            </div>
-            <div id="list-container-series"></div>
+            <div id="list-container-series" class="list-container"></div>
         </div>
 
         <!-- STATISTICS VIEW -->

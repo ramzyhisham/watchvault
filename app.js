@@ -33,6 +33,26 @@ function init() {
     applyPrefs();
     switchTab(prefs.activeTab);
     registerPWA();
+    syncHeaderHeight();
+}
+
+// Measures the real header height and writes it as a CSS variable so the
+// sticky filter bar always sits exactly below the header on any viewport.
+function syncHeaderHeight() {
+    const header = document.querySelector('header');
+    if (!header) return;
+
+    const update = () => {
+        document.documentElement.style.setProperty('--header-h', header.getBoundingClientRect().height + 'px');
+    };
+
+    update();
+    // Re-measure on resize (e.g. orientation change, browser chrome changes)
+    if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(update).observe(header);
+    } else {
+        window.addEventListener('resize', update);
+    }
 }
 
 function generateUniqueId() {
@@ -79,11 +99,20 @@ function loadState() {
     } catch {
         // use defaults
     }
+
+    // Search query and status filter are session-only — reset on every fresh load.
+    // Sort preferences are intentionally kept (persisted as user's preferred sort).
+    prefs.searchAnime = '';
+    prefs.searchSeries = '';
+    prefs.filterAnime = 'all';
+    prefs.filterSeries = 'all';
 }
 
 function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
-    localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+    // Exclude session-only fields from persisted prefs so fresh launches start clean.
+    const { searchAnime, searchSeries, filterAnime, filterSeries, ...persistedPrefs } = prefs;
+    localStorage.setItem(PREFS_KEY, JSON.stringify(persistedPrefs));
     changeCounter++;
     if (changeCounter % 30 === 0) showToast("Consider exporting a data backup under Settings!");
 }

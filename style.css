@@ -420,7 +420,7 @@ textarea:focus {
 }
 
 .controls {
-    margin-bottom: 14px;
+    margin-bottom: 0;
 }
 
 .search-wrap {
@@ -453,7 +453,7 @@ textarea:focus {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
-    margin-bottom: 16px;
+    margin-bottom: 0;
 }
 
 .pill {
@@ -503,6 +503,31 @@ textarea:focus {
 .pill.active[data-status="airing"] {
     background: linear-gradient(135deg, var(--teal), #0D9488);
     box-shadow: 0 0 8px rgba(45, 212, 191, 0.3);
+}
+
+/* Sticky Filter Bar */
+.sticky-filter-bar {
+    position: sticky;
+    /* Uses --header-h set dynamically by JS (syncHeaderHeight) for exact offset */
+    top: var(--header-h, 64px);
+    z-index: 100;
+    background: rgba(13, 13, 26, 0.82);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    border-bottom: 1px solid rgba(42, 42, 74, 0.55);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.38);
+    /* Bleed to edges to cover the main's side padding */
+    margin-left: -16px;
+    margin-right: -16px;
+    padding: 12px 16px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Spacing so cards don't start flush against the sticky bar */
+.list-container {
+    padding-top: 14px;
 }
 
 /* Cards & Lists */
@@ -1262,6 +1287,8 @@ textarea:focus {
     main {
         padding-bottom: 90px;
     }
+
+    /* Mobile header is shorter; --header-h is updated automatically by syncHeaderHeight() */
 
     .folder-tab .tab-label {
         display: inline-block;
